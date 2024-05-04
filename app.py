@@ -2,10 +2,12 @@ from flask import Flask, request, render_template_string
 import nltk
 from nltk.tokenize import sent_tokenize
 
+# Download the NLTK data only once; it's not needed every time in the actual application.
 nltk.download('punkt')
 
 app = Flask(__name__)
 
+# Function to load text from a file, handling errors if the file is not found.
 def load_text(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
@@ -13,12 +15,15 @@ def load_text(file_path):
     except FileNotFoundError:
         return None
 
+# Load the text once when the server starts.
 text = load_text('Germania.txt')
 
+# Function to find sentences that contain a specified word.
 def find_sentences_containing_word(text, word):
     sentences = sent_tokenize(text, language='german')
     return [sentence for sentence in sentences if word.lower() in sentence.lower()]
 
+# Define the route and the request handling for the root of the website.
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -30,6 +35,7 @@ def index():
             return render_template_string(HTML_TEMPLATE, sentences=[], word=word)
     return render_template_string(HTML_TEMPLATE)
 
+# HTML template defined as a Python multi-line string for rendering the search form and results.
 HTML_TEMPLATE = '''
 <!doctype html>
 <html lang="en">
@@ -62,5 +68,7 @@ HTML_TEMPLATE = '''
 </html>
 '''
 
+# Run the app only if this script is executed as the main program.
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Turn off debug mode when deploying to production.
+    app.run(debug=False)
